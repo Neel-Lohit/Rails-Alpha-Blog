@@ -27,7 +27,7 @@
   </div>
   
     <div class="actions">
-      <%= form.submit %>
+      <%= form.submit(@user.new_record? ? "Sign up" : "Update account") %>
     </div>
   <% end %>
   
