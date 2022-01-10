@@ -21,6 +21,12 @@
     <%= form.text_area :description %>
   </div>
 
+  <div class="category">
+  <%= form.label :category %>
+  <%= form.collection_select(:category_ids, Category.all, :id, :name,
+  { prompt: "Make your selection from the list below (can be empty)"}, { multiple: true, size: 3 }) %>        
+  </div>
+
   <div class="actions">
     <%= form.submit %>
   </div>

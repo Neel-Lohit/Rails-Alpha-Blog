@@ -1,14 +1,18 @@
 class UsersController < ApplicationController
+    skip_before_action :authenticate_request, only: [:new]
     before_action :set_user, only: %i[ show edit update destroy ]
+    before_action :require_user, only: [:edit, :update]
+    before_action :require_same_user, only: [:edit, :update, :destroy]
   
     # GET /users or /users.json
     def index
-      @users = User.all
+      @users = User.paginate(page: params[:page], per_page: 5)
     end
   
     # GET /users/1 or /users/1.json
     def show
      # byebug - for debugging
+
     end
   
     # GET /users/new
@@ -26,6 +30,7 @@ class UsersController < ApplicationController
   
       respond_to do |format|
         if @user.save
+          session[:user_id] = @user.id
           format.html { redirect_to articles_path, notice: "Welcome to the Alpha Blog #{@user.username}, you have successfully signed up" }
           format.json { render :show, status: :created, location: @article }
         else
@@ -51,22 +56,34 @@ class UsersController < ApplicationController
     # DELETE /users/1 or /users/1.json
     def destroy
       @user.destroy
-  
-      respond_to do |format|
-        format.html { redirect_to users_url, notice: "User was successfully destroyed." }
-        format.json { head :no_content }
-      end
+      session[:user_id] = nil if @user == current_user
+      flash[:notice] = "Account and all associated articles successfully deleted"
+      redirect_to articles_path
     end
   
     private
       # Use callbacks to share common setup or constraints between actions.
       def set_user
         @user = User.find(params[:id])
+        @articles = @user.articles.paginate(page: params[:page], per_page: 5)
       end
   
       # Only allow a list of trusted parameters through.
       def user_params
         params.require(:user).permit(:username, :email, :password)
       end
+
+      def require_same_user
+        if current_user != @user && !current_user.admin?
+          flash[:alert] = "You can only edit or delete your own account"
+          redirect_to @user
+        end
+      end
+
+
+
+
+
+
   end
   
