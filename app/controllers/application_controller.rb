@@ -1,4 +1,7 @@
 class ApplicationController < ActionController::Base
+    include Pundit
+    include JSONAPI::ActsAsResourceController
+    protect_from_forgery with: :null_session
 
     before_action :authenticate_request
     helper_method :current_user, :logged_in?
@@ -8,7 +11,7 @@ class ApplicationController < ActionController::Base
     end
 
     def logged_in?
-        !!current_user
+        !!@current_user
 
     end
 
@@ -21,7 +24,7 @@ class ApplicationController < ActionController::Base
 
     def authenticate_request
         #byebug
-        @current_user = AuthorizeApiRequest.call(request.headers,session['token']).result
+        @current_user = AuthorizeApiRequest.call(request.headers,request.headers['Authorization'].split(' ')[1]).result
         render json: { error: 'Not Authorized' }, status: 401 unless @current_user
     end
 
