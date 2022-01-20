@@ -1,7 +1,7 @@
 <h1 class="text-center mt-4">Categories</h1>
 
 <br>
-<% if logged_in? && current_user.admin? %>
+<% if logged_in? && policy_scope(@categories) %>
 <div class="container">
   <div class="row justify-content-md-center">
     <div class="col-4 mt-4">

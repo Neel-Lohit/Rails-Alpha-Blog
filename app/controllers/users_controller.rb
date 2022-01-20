@@ -1,5 +1,5 @@
 class UsersController < ApplicationController
-    skip_before_action :authenticate_request, only: [:new]
+    skip_before_action :authenticate_request, only: [:new, :index, :show]
     before_action :set_user, only: %i[ show edit update destroy ]
     before_action :require_user, only: [:edit, :update]
     before_action :require_same_user, only: [:edit, :update, :destroy]
@@ -7,11 +7,20 @@ class UsersController < ApplicationController
     # GET /users or /users.json
     def index
       @users = User.paginate(page: params[:page], per_page: 5)
+      authorize(@users)
+      respond_to do |format|
+        format.html { @users }
+        format.json { render json: @users }
+      end
     end
   
     # GET /users/1 or /users/1.json
     def show
      # byebug - for debugging
+     respond_to do |format|
+      format.html { @user }
+      format.json { render json: @user }
+    end
 
     end
   

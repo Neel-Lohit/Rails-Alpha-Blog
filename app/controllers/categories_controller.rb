@@ -1,13 +1,13 @@
 class CategoriesController < ApplicationController
     skip_before_action :authenticate_request, only: [:index, :show]
-    before_action :require_admin, except: [:index, :show]
+    before_action :require_admin, except: [:new, :index, :show, :create]
 
     def new
         @category = Category.new 
     end
   
     def create
-        @category = Category.new(category_params)
+        @category = policy_scope(Category).new(category_params)
         if @category.save
           flash[:notice] = "Category was successfully created"
           redirect_to @category
@@ -32,11 +32,20 @@ class CategoriesController < ApplicationController
 
     def index
         @categories = Category.paginate(page: params[:page], per_page: 5)
+        #authorize(@categories)
+        respond_to do |format|
+          format.html { @category }
+          format.json { render json: @category }
+        end
     end
   
     def show
         @category = Category.find(params[:id])
         @articles = @category.articles.paginate(page: params[:page], per_page: 5)
+        respond_to do |format|
+          format.html { @category }
+          format.json { render json: @category }
+        end
     end
 
     def category_params
